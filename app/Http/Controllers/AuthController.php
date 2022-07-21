@@ -8,6 +8,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -35,4 +36,27 @@ class AuthController extends Controller
         
         return response()->json(compact('user','token'),201);
     }
+
+    public function login(Request $request)
+    {
+        //el request y only esta creando un array con esos campos espec y lo guarda en input
+        $input = $request->only('email', 'password');
+        $jwt_token = null;
+        //devuelve un token con las credenciales que le hemos pasado y comprueba que son validas
+        //devolviendo true o false, devolviendo un mensaje, y si es true un token si es true,
+        // y si es false devuelve el token con un null
+        if (!$jwt_token = JWTAuth::attempt($input)) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Email or Password',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return response()->json([
+            'success' => true,
+            'token' => $jwt_token,
+            ]);
+    }
+
 }
